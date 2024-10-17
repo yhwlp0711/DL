@@ -4,11 +4,14 @@ import torch.optim as optim
 import pandas as pd
 
 # Check if CUDA is available
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('mps')
 
 # Load data
-train = pd.read_csv('./data/train.csv')
-test = pd.read_csv('./data/test.csv')
+# train = pd.read_csv('./data/train.csv')
+# test = pd.read_csv('./data/test.csv')
+train = pd.read_csv('./Kaggle/Titanic/data/train.csv')
+test = pd.read_csv('./Kaggle/Titanic/data/test.csv')
 
 # Preprocess data
 label = train['Survived']
@@ -28,14 +31,16 @@ test = all_data.iloc[n_train:]
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(13, 128)
-        self.fc2 = nn.Linear(128, 256)
-        self.fc3 = nn.Linear(256, 2)
+        self.fc1 = nn.Linear(13, 64)
+        self.fc2 = nn.Linear(64, 128)
+        self.fc3 = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, 2)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = torch.relu(self.fc3(x))
+        x = self.fc4(x)
         return x
 
 
@@ -73,4 +78,4 @@ if __name__ == '__main__':
     train_model(model, train_tensor, label_tensor)
     prediction = predict(model, test_tensor)
     submission = pd.DataFrame({'PassengerId': test.index+892, 'Survived': prediction})
-    submission.to_csv('./data/submission.csv', index=False)
+    submission.to_csv('./Kaggle/Titanic/data/submission.csv', index=False)
