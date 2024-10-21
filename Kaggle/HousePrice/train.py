@@ -4,8 +4,10 @@ import torch.optim as optim
 import pandas as pd
 
 # Load data
-train = pd.read_csv('./Kaggle/HousePrice/data/train.csv')
-test = pd.read_csv('./Kaggle/HousePrice/data/test.csv')
+# train = pd.read_csv('./Kaggle/HousePrice/data/train.csv')
+# test = pd.read_csv('./Kaggle/HousePrice/data/test.csv')
+train = pd.read_csv('./data/train.csv')
+test = pd.read_csv('./data/test.csv')
 
 # Preprocess data
 label = train['SalePrice']

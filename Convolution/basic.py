@@ -28,25 +28,37 @@ class Conv2D(nn.Module):
         return corr2d(x, self.weight) + self.bias
 
 
-X = torch.ones((6, 8))
-X[:, 2:6] = 0
-# print(X)
-K = torch.tensor([[1.0, -1.0]])
-Y = corr2d(X, K)
+# X = torch.ones((6, 8))
+# X[:, 2:6] = 0
+# # print(X)
+# K = torch.tensor([[1.0, -1.0]])
+# Y = corr2d(X, K)
 # print(Y)
 
-conv2d = nn.Conv2d(1, 1, kernel_size=(1, 2), bias=False)
+# conv2d = nn.Conv2d(1, 1, kernel_size=(1, 2), bias=False)
 
-X = X.reshape((1, 1, 6, 8))
-Y = Y.reshape((1, 1, 6, 7))
+# X = X.reshape((1, 1, 6, 8))
+# Y = Y.reshape((1, 1, 6, 7))
 
-for i in range(10):
-    Y_hat = conv2d(X)
-    l = (Y_hat - Y) ** 2
-    conv2d.zero_grad()
-    l.sum().backward()
-    conv2d.weight.data[:] -= 3e-2 * conv2d.weight.grad
-    if (i + 1) % 2 == 0:
-        print(f'batch {i + 1}, loss {l.sum():.3f}')
+# for i in range(10):
+#     Y_hat = conv2d(X)
+#     l = (Y_hat - Y) ** 2
+#     conv2d.zero_grad()
+#     l.sum().backward()
+#     conv2d.weight.data[:] -= 3e-2 * conv2d.weight.grad
+#     if (i + 1) % 2 == 0:
+#         print(f'batch {i + 1}, loss {l.sum():.3f}')
+#
+# print(conv2d.weight.data.reshape((1, 2)))
 
-print(conv2d.weight.data.reshape((1, 2)))
+
+def comp_conv2d(conv2d, X):
+    X = X.reshape((1, 1) + X.shape)
+    Y = conv2d(X)
+    return Y.reshape(Y.shape[2:])
+
+
+conv2d = nn.Conv2d(1, 1, kernel_size=3, padding=1)
+X = torch.rand(size=(8, 8))
+Z = comp_conv2d(conv2d, X)
+print(Z.shape)
