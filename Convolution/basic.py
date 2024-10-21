@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from d2l import torch as d2l
+# from d2l import torch as d2l
 
 
 def corr2d(X, K):
@@ -58,7 +58,51 @@ def comp_conv2d(conv2d, X):
     return Y.reshape(Y.shape[2:])
 
 
-conv2d = nn.Conv2d(1, 1, kernel_size=3, padding=1)
-X = torch.rand(size=(8, 8))
-Z = comp_conv2d(conv2d, X)
-print(Z.shape)
+# conv2d = nn.Conv2d(1, 1, kernel_size=3, padding=1)
+# X = torch.rand(size=(8, 8))
+# Z = comp_conv2d(conv2d, X)
+# print(Z.shape)
+
+
+def corr2d_multi_in(X, K):
+    """Compute cross-correlation with multiple input channels."""
+    return sum(corr2d(x, k) for x, k in zip(X, K))
+
+
+def corr2d_multi_in_out(X, K):
+    """Compute cross-correlation with multiple input and output channels."""
+    return torch.stack([corr2d_multi_in(X, k) for k in K], 0)
+
+
+X = torch.tensor([[[0.0, 1.0, 2.0], [3.0, 4.0, 5.0], [6.0, 7.0, 8.0]],
+                    [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]])
+K = torch.tensor([[[ 0.0, 1.0], [2.0, 3.0]], [[1.0, 2.0], [3.0, 4.0]]])
+# print(corr2d_multi_in(X, K))
+K = torch.stack((K, K + 1, K + 2), 0)
+# print(K)
+print(corr2d_multi_in_out(X, K))
+
+
+def corr2d_multi_in_out_1x1(X, K):
+    c_i, h, w = X.shape
+    c_o = K.shape[0]
+    X = X.reshape((c_i, h * w))
+    K = K.reshape((c_o, c_i))
+    Y = torch.matmul(K, X)
+    return Y.reshape(c_o, h, w)
+
+
+def pool2d(X, pool_size, mode='max'):
+    p_w, p_h = pool_size
+    Y = torch.zeros((X.shape[0]-p_w+1, X.shape[1]-p_h+1))
+    for i in range(Y.shape[0]):
+        for j in range(Y.shape[1]):
+            if mode == 'max':
+                Y[i, j] = X[i:i+p_w, j:j+p_h].max()
+            elif mode == 'avg':
+                Y[i, j] = X[i:i+p_w, j:j+p_h].mean()
+    
+    return Y
+
+
+
