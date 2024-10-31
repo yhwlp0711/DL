@@ -122,8 +122,83 @@ class NiN(nn.Module):
         return self.__net
 
 
-net = NiN()
-X = torch.randn(size=(1, 1, 224, 224))
+# net = NiN()
+# X = torch.randn(size=(1, 1, 224, 224))
+# for blk in net.get_net():
+#     X = blk(X)
+#     print(blk.__class__.__name__, 'output shape:\t', X.shape)
+
+
+class Inception(nn.Module):
+    def __init__(self, in_channels, c1, c2, c3, c4):
+        super(Inception, self).__init__()
+        # Path 1
+        self.__p1_1 = nn.Conv2d(in_channels, c1, kernel_size=1)
+        # Path 2
+        self.__p2_1 = nn.Conv2d(in_channels, c2[0], kernel_size=1)
+        self.__p2_2 = nn.Conv2d(c2[0], c2[1], kernel_size=3, padding=1)
+        # Path 3
+        self.__p3_1 = nn.Conv2d(in_channels, c3[0], kernel_size=1)
+        self.__p3_2 = nn.Conv2d(c3[0], c3[1], kernel_size=5, padding=2)
+        # Path 4
+        self.__p4_1 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
+        self.__p4_2 = nn.Conv2d(in_channels, c4, kernel_size=1)
+
+    def forward(self, x):
+        p1 = torch.relu(self.__p1_1(x))
+        p2 = torch.relu(self.__p2_2(torch.relu(self.__p2_1(x))))
+        p3 = torch.relu(self.__p3_2(torch.relu(self.__p3_1(x))))
+        p4 = torch.relu(self.__p4_2(self.__p4_1(x)))
+        return torch.cat((p1, p2, p3, p4), dim=1)
+    
+
+class GoogLeNet(nn.Module):
+    def __init__(self):
+        super(GoogLeNet, self).__init__()
+        self.__b1 = nn.Sequential(
+            nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        )
+        self.__b2 = nn.Sequential(
+            nn.Conv2d(64, 64, kernel_size=1),
+            nn.ReLU(),
+            nn.Conv2d(64, 192, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        )
+        self.__b3 = nn.Sequential(
+            Inception(192, 64, (96, 128), (16, 32), 32),
+            Inception(256, 128, (128, 192), (32, 96), 64),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        )
+        self.__b4 = nn.Sequential(
+            Inception(480, 192, (96, 208), (16, 48), 64),
+            Inception(512, 160, (112, 224), (24, 64), 64),
+            Inception(512, 128, (128, 256), (24, 64), 64),
+            Inception(512, 112, (144, 288), (32, 64), 64),
+            Inception(528, 256, (160, 320), (32, 128), 128),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        )
+        self.__b5 = nn.Sequential(
+            Inception(832, 256, (160, 320), (32, 128), 128),
+            Inception(832, 384, (192, 384), (48, 128), 128),
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Flatten()
+        )
+        self.__net = nn.Sequential(self.__b1,
+                                    self.__b2, self.__b3, self.__b4,
+                                    self.__b5, nn.Linear(1024, 10))
+        
+    def forward(self, x):
+        return self.__net(x)
+    
+    def get_net(self):
+        return self.__net
+    
+
+net = GoogLeNet()
+X = torch.randn(size=(1, 1, 96, 96))
 for blk in net.get_net():
     X = blk(X)
     print(blk.__class__.__name__, 'output shape:\t', X.shape)
