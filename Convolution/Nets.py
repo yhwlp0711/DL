@@ -1,6 +1,48 @@
 import torch
 import torch.nn as nn
 
+device = torch.device('mps')
+
+
+class BatchNorm(nn.Module):
+    def __init__(self, num_features, num_dims):
+        super(BatchNorm, self).__init__()
+        if num_dims == 2:
+            shape = (1, num_features)
+        else:
+            shape = (1, num_features, 1, 1)
+        self.alpha = nn.Parameter(torch.ones(shape))
+        self.beta = nn.Parameter(torch.zeros(shape))
+        self.moving_mean = torch.zeros(shape)
+        self.moving_var = torch.zeros(shape)
+
+    def batch_norm(self, X, eps=1e-5, momentum=0.9):
+        if not torch.is_grad_enabled():
+            X_hat = (X -self.moving_mean) / torch.sqrt(self.moving_var + eps)
+        else:
+            assert len(X.shape) in (2, 4)
+            if len(X.shape) == 2:
+                mean = X.mean(dim=0, keepdim=True)
+                var = ((X - mean) ** 2).mean(dim=0, keepdim=True)
+            else:
+                mean = X.mean(dim=(0, 2, 3), keepdim=True)
+                var = ((X - mean) ** 2).mean(dim=(0, 2, 3), keepdim=True)
+            
+            X_hat = (X - mean) / torch.sqrt(var + eps)
+            self.moving_mean = momentum * self.moving_mean + (1.0 - momentum) * mean
+            self.moving_var = momentum * self.moving_var + (1.0 - momentum) * var
+            Y = self.alpha * X_hat + self.beta
+            return Y, self.moving_mean, self.moving_var
+
+    def forward(self, X):
+        if self.moving_mean.device != X.device:
+            self.moving_mean = self.moving_mean.to(X.device)
+            self.moving_var = self.moving_var.to(X.device)
+        
+        Y, self.moving_mean, self.moving_var = self.batch_norm(X, self.moving_mean, self.moving_var)
+
+        return Y
+
 
 class Reshape(nn.Module):
     def forward(self, x):
@@ -152,6 +194,7 @@ class Inception(nn.Module):
         return torch.cat((p1, p2, p3, p4), dim=1)
     
 
+
 class GoogLeNet(nn.Module):
     def __init__(self):
         super(GoogLeNet, self).__init__()
@@ -197,8 +240,80 @@ class GoogLeNet(nn.Module):
         return self.__net
     
 
-net = GoogLeNet()
-X = torch.randn(size=(1, 1, 96, 96))
-for blk in net.get_net():
-    X = blk(X)
-    print(blk.__class__.__name__, 'output shape:\t', X.shape)
+# net = GoogLeNet()
+# X = torch.randn(size=(1, 1, 96, 96))
+# for blk in net.get_net():
+#     X = blk(X)
+#     print(blk.__class__.__name__, 'output shape:\t', X.shape)
+
+# net = nn.Sequential(
+#     nn.Conv2d(1,6, kernel_size=5), BatchNorm(6, num_dims=4), nn.Sigmoid(),
+#     nn.MaxPool2d(kernel_size=2, stride=2),
+#     nn.Conv2d(6, 16, kernel_size=5), BatchNorm(16, num_dims=4), nn.Sigmoid(),
+#     nn.MaxPool2d(kernel_size=2, stride=2), nn.Flatten(),
+#     nn.Linear(16*4*4, 120), BatchNorm(120, num_dims=2), nn.Sigmoid(),
+#     nn.Linear(120, 84), BatchNorm(84, num_dims=2), nn.Sigmoid(),
+#     nn.Linear(84, 10)
+# )
+
+# net = net.to(device)
+# X = torch.randn(size=(1, 1, 28, 28), device=device)
+# for layer in net:
+#     X = layer(X)
+#     print(layer.__class__.__name__, 'output shape:\t', X.shape)
+
+
+class Residual(nn.Module):
+    def __init__(self, in_channels, out_channels, use_1x1conv=False, stride=1):
+        super(Residual, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=stride)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
+        if use_1x1conv:
+            self.conv3 = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride)
+        else:
+            self.conv3 = None
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+
+    def forward(self, X):
+        Y = torch.relu(self.bn1(self.conv1(X)))
+        Y = self.bn2(self.conv2(Y))
+        if self.conv3:
+            X = self.conv3(X)
+        Y = Y + X
+        return torch.relu(Y)
+    
+
+class ResNet(nn.Module):
+    def __init__(self):
+        super(ResNet, self).__init__()
+        b1 = nn.Sequential(nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3),
+                           nn.BatchNorm2d(64), nn.ReLU(),
+                           nn.MaxPool2d(kernel_size=3, stride=2, padding=1))
+        b2 = nn.Sequential(*self.resnet_block(64, 64, 2, first_block=True))
+        b3 = nn.Sequential(*self.resnet_block(64, 128, 2))
+        b4 = nn.Sequential(*self.resnet_block(128, 256, 2))
+        b5 = nn.Sequential(*self.resnet_block(256, 512, 2))
+        self.net = nn.Sequential(b1, b2, b3, b4, b5, nn.AdaptiveAvgPool2d((1, 1)), nn.Flatten(), nn.Linear(512, 10))
+        
+    def resnet_block(self, in_channels, out_channels, num_residuals, first_block=False):
+        if first_block:
+            assert in_channels == out_channels
+        blk = []
+        for i in range(num_residuals):
+            if i == 0 and not first_block:
+                blk.append(Residual(in_channels, out_channels, use_1x1conv=True, stride=2))
+            else:
+                blk.append(Residual(out_channels, out_channels))
+        return blk
+    
+    def forward(self, x):
+        return self.net(x)
+    
+
+# net = ResNet()
+# net = net.to(device)
+# X = torch.randn(size=(1, 1, 224, 224), device=device)
+# for layer in net.net:
+#     X = layer(X)
+#     print(layer.__class__.__name__, 'output shape:\t', X.shape)
