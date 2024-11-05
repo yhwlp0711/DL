@@ -1,7 +1,15 @@
+import platform
+
 import torch
 import torch.nn as nn
 
-device = torch.device('mps')
+
+if platform.system() == 'Windows' or platform.system() == 'Linux':
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+elif platform.system() == 'Darwin':
+    device = torch.device('mps')
+
+print('Using device:', device)
 
 
 class BatchNorm(nn.Module):
