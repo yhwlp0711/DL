@@ -12,7 +12,7 @@ def read_time_machine():
     return [re.sub('[^A-Za-z]+', ' ', line).strip().lower() for line in lines]
 
 
-lines = read_time_machine()
+# lines = read_time_machine()
 # print(f'# text lines: {len(lines)}')
 # print(lines[0])
 # print(lines[10])
@@ -27,7 +27,7 @@ def tokenize(lines, token='word'):
         print('ERROR: unknown token type: ' + token)
 
 
-tokens = tokenize(lines)
+# tokens = tokenize(lines)
 # for i in range(11):
 #     print(tokens[i])
 
@@ -74,7 +74,7 @@ class Vocab:
 
 def load_corpus_time_machine(max_tokens=-1):
     lines = read_time_machine()
-    tokens = tokenize(lines, 'char')
+    tokens = tokenize(lines, 'word')
     vocab = Vocab(tokens)
     corpus = [vocab[token] for line in tokens for token in line]
     if max_tokens > 0:
@@ -82,4 +82,4 @@ def load_corpus_time_machine(max_tokens=-1):
     return corpus, vocab
 
 
-corpus, vocab = load_corpus_time_machine()
+# corpus, vocab = load_corpus_time_machine()
