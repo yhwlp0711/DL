@@ -1,5 +1,7 @@
 import random
 import torch
+
+from gb import get_device
 from Vocab import read_time_machine, Vocab, load_corpus_time_machine
 from d2l import torch as d2l
 
@@ -81,7 +83,7 @@ def seq_data_iter_sequential(corpus, batch_size, num_steps):
 
 
 class SeqDataLoader:
-    def __init__(self, batch_size, num_steps, use_random_iter, max_tokens):
+    def __init__(self, batch_size, num_steps, use_random_iter=False, max_tokens=-1):
         if use_random_iter:
             self.data_iter_fn = seq_data_iter_random
         else:
