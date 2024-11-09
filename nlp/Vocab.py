@@ -74,9 +74,9 @@ class Vocab:
 
 def load_corpus_time_machine(max_tokens=-1):
     lines = read_time_machine()
-    tokens = tokenize(lines, 'word')
-    vocab = Vocab(tokens)
-    corpus = [vocab[token] for line in tokens for token in line]
+    tokens = tokenize(lines, 'char')
+    vocab = Vocab(tokens)  # Vocabn中的token按照频率排序
+    corpus = [vocab[token] for line in tokens for token in line]  # 找到每个token在vocab中的索引
     if max_tokens > 0:
         corpus = corpus[:max_tokens]
     return corpus, vocab

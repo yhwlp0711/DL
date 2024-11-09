@@ -99,6 +99,6 @@ class SeqDataLoader:
         return num_batches // self.num_steps * self.num_steps
 
 
-def load_data_time_machine(batch_size, num_steps, use_random_iter=False, max_tokens=10000):
+def load_data_time_machine(batch_size, num_steps, use_random_iter=False, max_tokens=-1):
     data_loader = SeqDataLoader(batch_size, num_steps, use_random_iter, max_tokens)
     return data_loader, data_loader.vocab
