@@ -1,20 +1,19 @@
 import random
 import torch
 
-from gb import get_device
-from Vocab import read_time_machine, Vocab, load_corpus_time_machine
-from d2l import torch as d2l
+from Vocab import read_time_machine, Vocab, load_corpus_time_machine, tokenize
+# from d2l import torch as d2l
 
 
 def get_vocab(data=read_time_machine()):
-    tokens = d2l.tokenize(data)
+    tokens = tokenize(data)
     corpus = [token for line in tokens for token in line]
     vocab = Vocab(corpus)
     return vocab
 
 
 def get_biggram_vocab(data=read_time_machine()):
-    tokens = d2l.tokenize(data)
+    tokens = tokenize(data)
     corpus = [token for line in tokens for token in line]
     bigram_tokens = [pair for pair in zip(corpus[:-1], corpus[1:])]
     bigram_vocab = Vocab(bigram_tokens)
@@ -22,7 +21,7 @@ def get_biggram_vocab(data=read_time_machine()):
 
 
 def get_trigram_vocab(data=read_time_machine()):
-    tokens = d2l.tokenize(data)
+    tokens = tokenize(data)
     corpus = [token for line in tokens for token in line]
     trigram_tokens = [triple for triple in zip(corpus[:-2], corpus[1:-1], corpus[2:])]
     trigram_vocab = Vocab(trigram_tokens)
