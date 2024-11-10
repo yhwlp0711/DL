@@ -5,7 +5,7 @@ from torch import nn
 from torch.nn import functional as F
 
 from gb import get_device
-from LMandDataset import load_data_time_machine
+from nlp.VocabandDataset.LMandDataset import load_data_time_machine
 
 device = get_device()
 
