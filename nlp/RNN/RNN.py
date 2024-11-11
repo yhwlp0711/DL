@@ -4,8 +4,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from nlp.VocabandDataset.LMandDataset import load_data_time_machine
-from gb import get_device
+from NLP.nlp.VocabandDataset.LMandDataset import load_data_time_machine
+from NLP.gb import get_device
 
 device = get_device()
 

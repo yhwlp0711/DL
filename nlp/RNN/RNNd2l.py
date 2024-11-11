@@ -4,8 +4,8 @@ from d2l import torch as d2l
 from torch import nn
 from torch.nn import functional as F
 
-from gb import get_device
-from nlp.VocabandDataset.LMandDataset import load_data_time_machine
+from NLP.gb import get_device
+from NLP.nlp.VocabandDataset.LMandDataset import load_data_time_machine
 
 device = get_device()
 
@@ -103,9 +103,10 @@ def grad_clipping(net, theta):
 
 def train_epoch_ch8(net, train_iter, loss, updater, device, use_random_iter):
     # 初始化状态和计时器
-    state, timer = None, d2l.Timer()
+    state = None
     # 初始化指标累加器，用于跟踪训练损失总和和标记数量
-    metric = d2l.Accumulator(2)  # [训练损失总和, 标记数量]
+    # metric = d2l.Accumulator(2)  # [训练损失总和, 标记数量]
+    metric = [0,0]
     # 遍历训练数据
     for X, Y in train_iter:
         if state is None or use_random_iter:
@@ -143,10 +144,11 @@ def train_epoch_ch8(net, train_iter, loss, updater, device, use_random_iter):
             updater(batch_size=1)
 
         # 累加损失和标记数量
-        metric.add(l * y.numel(), y.numel())
-
+        # metric.add(l * y.numel(), y.numel())
+        metric[0] += l * y.numel()
+        metric[1] +=y.numel()
     # 返回困惑度和每秒标记数量
-    return math.exp(metric[0] / metric[1]), metric[1] / timer.stop()
+    return math.exp(metric[0] / metric[1])
 
 
 def train_ch8(net, train_iter, vocab, lr, num_epochs, device, use_random_iter=False):
@@ -161,11 +163,11 @@ def train_ch8(net, train_iter, vocab, lr, num_epochs, device, use_random_iter=Fa
     # 训练模型
     for epoch in range(num_epochs):
         # 使用困惑度作为评估指标
-        ppl, speed = train_epoch_ch8(net, train_iter, loss, updater, device, use_random_iter)
+        ppl = train_epoch_ch8(net, train_iter, loss, updater, device, use_random_iter)
         if (epoch + 1) % 10 == 0:
             print(predict('time traveller'))
             # print(f'困惑度 {ppl:.1f}, {speed:.1f} 标记/秒 {str(device)}')
-    print(f'最终困惑度 {ppl:.1f}, {speed:.1f} 标记/秒 {str(device)}')
+    print(f'最终困惑度 {ppl:.1f}, {str(device)}')
     print(predict('time traveller'))
     print(predict('traveller'))
 

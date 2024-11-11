@@ -1,5 +1,6 @@
 import collections
 import re
+import platform
 # from d2l import torch as d2l
 
 # d2l.DATA_HUB['time_machine'] = (d2l.DATA_URL + 'timemachine.txt', '090b5e7e70c295757f55df93cb0a180b9691891a')
@@ -7,7 +8,13 @@ import re
 
 def read_time_machine():
     """Load the time machine dataset into a list of text lines."""
-    with open('C:/MO/CODE/Python/NLP/data/timemachine.txt') as f:
+    if platform.system() == 'Windows':
+        path = 'C:/MO/CODE/Python/NLP/data/timemachine.txt'
+    elif platform.system() == 'Linux':
+        path = '/mnt/disk_8Td/zhn/father/NLP/data/timemachine.txt'
+    elif platform.system() == 'Darwin':
+        path = ''
+    with open(path) as f:
         lines = f.readlines()
     return [re.sub('[^A-Za-z]+', ' ', line).strip().lower() for line in lines]
 
