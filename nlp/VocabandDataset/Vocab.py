@@ -7,7 +7,7 @@ import re
 
 def read_time_machine():
     """Load the time machine dataset into a list of text lines."""
-    with open('/Users/chenmo/code/NLP/data/timemachine.txt') as f:
+    with open('C:/MO/CODE/Python/NLP/data/timemachine.txt') as f:
         lines = f.readlines()
     return [re.sub('[^A-Za-z]+', ' ', line).strip().lower() for line in lines]
 

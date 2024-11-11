@@ -39,8 +39,9 @@ class RNNModel(nn.Module):
         if not isinstance(self.rnn, nn.LSTM):
             return torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device)
         else:
-            return (torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device),
-                    torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device))
+            return (
+            torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device),
+            torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device))
 
 
 def grad_clipping(net, theta):
@@ -132,7 +133,7 @@ def train(net, train_iter, vocab, lr, num_epochs, device, use_random_iter=False)
     print(f'最终困惑度 {ppl:.1f}, {str(device)}')
     print(predictd('time traveller'))
     print(predictd('traveller'))
-    
+
 
 if __name__ == '__main__':
     train_iter, vocab = load_data_time_machine(batch_size=32, num_steps=35)

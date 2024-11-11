@@ -220,5 +220,5 @@ def train2():
 
 
 if __name__ == '__main__':
-    # train1()
-    train2()
+    train1()
+    # train2()
