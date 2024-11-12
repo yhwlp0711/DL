@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 
-from NLP.nlp.gb import get_device
-from NLP.nlp.VocabandDataset.LMandDataset import load_data_time_machine
-from NLP.nlp.RNN.RNNd2l import RNNModelScratch, train_ch8
+from nlp.gb import get_device
+from nlp.VocabandDataset.LMandDataset import load_data_time_machine
+from nlp.RNN.RNNd2l import RNNModelScratch, train_ch8
 
 device = get_device()
 batch_size, num_steps = 32, 35
