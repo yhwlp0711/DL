@@ -81,7 +81,7 @@ def train2():
 
 
 if __name__ == '__main__':
-    print('train1')
-    train1()
+    # print('train1')
+    # train1()
     print('train2')
     train2()
