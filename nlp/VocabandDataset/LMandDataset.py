@@ -1,7 +1,7 @@
 import random
 import torch
 
-from NLP.nlp.VocabandDataset.Vocab import read_time_machine, Vocab, load_corpus_time_machine, tokenize
+from VocabandDataset.Vocab import read_time_machine, Vocab, load_corpus_time_machine, tokenize
 # from d2l import torch as d2l
 
 

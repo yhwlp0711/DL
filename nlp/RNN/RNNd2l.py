@@ -4,8 +4,8 @@ from d2l import torch as d2l
 from torch import nn
 from torch.nn import functional as F
 
-from NLP.gb import get_device
-from NLP.nlp.VocabandDataset.LMandDataset import load_data_time_machine
+from gb import get_device
+from VocabandDataset.LMandDataset import load_data_time_machine
 
 device = get_device()
 
