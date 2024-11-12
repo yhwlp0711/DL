@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from nlp.VocabandDataset.LMandDataset import load_data_time_machine
+from nlp.RNN.RNN import RNNModel
 from nlp.RNN.RNNd2l import RNNModelScratch, train_ch8
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -63,7 +64,24 @@ def lstm(inputs, state, params):
     return torch.cat(outputs, dim=0), (H, C)
 
 
-vocab_size, num_hiddens = len(vocab), 256
-num_epochs, lr = 500, 1
-model = RNNModelScratch(len(vocab), num_hiddens, device, get_lstm_params, init_lstm_state, lstm)
-train_ch8(model, train_iter, vocab, lr, num_epochs, device)
+def train1():
+    vocab_size, num_hiddens = len(vocab), 256
+    num_epochs, lr = 500, 1
+    model = RNNModelScratch(len(vocab), num_hiddens, device, get_lstm_params, init_lstm_state, lstm)
+    train_ch8(model, train_iter, vocab, lr, num_epochs, device)
+
+
+def train2():
+    num_hiddens = 256
+    num_epochs, lr = 500, 1
+    lstm_layer = nn.LSTM(len(vocab), num_hiddens)
+    model = RNNModel(len(vocab), lstm_layer)
+    model = model.to(device)
+    train_ch8(model, train_iter, vocab, lr, num_epochs, device)
+
+
+if __name__ == '__main__':
+    print('train1')
+    train1()
+    print('train2')
+    train2()
