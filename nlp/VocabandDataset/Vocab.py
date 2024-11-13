@@ -8,10 +8,11 @@ import platform
 
 def read_time_machine():
     """Load the time machine dataset into a list of text lines."""
+    path = ''
     if platform.system() == 'Windows':
-        path = 'C:/MO/CODE/Python/NLP/data/timemachine.txt'
+        path = 'C:/MO/CODE/Python/NLP/nlp/data/timemachine.txt'
     elif platform.system() == 'Linux':
-        path = '/mnt/disk_8Td/zhn/father/NLP/data/timemachine.txt'
+        path = '/mnt/disk_8Td/zhn/father/NLP/nlp/data/timemachine.txt'
     elif platform.system() == 'Darwin':
         path = ''
     with open(path) as f:
@@ -40,10 +41,13 @@ def tokenize(lines, token='word'):
 
 
 def count_corpus(tokens):
+    """返回一个字典，键是token，值是token的频率"""
     # Here `tokens` is a 1D list or 2D list
     if len(tokens) == 0 or isinstance(tokens[0], list):
         # Flatten a list of token lists into a list of tokens
+        # tokens为二维列表，将其展平为一维列表
         tokens = [token for line in tokens for token in line]
+    # 返回一个字典，键是token，值是token的频率
     return collections.Counter(tokens)
 
 
@@ -51,15 +55,22 @@ class Vocab:
     def __init__(self, tokens, min_freq=0, reserved_tokens=None):
         if reserved_tokens is None:
             reserved_tokens = []
-        # Sort according to frequencies
+        # 统计词频
         counter = count_corpus(tokens)
+        # 按照词频排序
+        # counter.items() 返回一个包含字典所有键值对的列表
+        # 排序时使用每个键值对的第二个值（即词频）作为排序的依据
+        # reverse=True 表示降序排序
         self.token_freqs = sorted(counter.items(), key=lambda x: x[1], reverse=True)
         # The index for the unknown token is 0
         self.unk, uniq_tokens = 0, ['<unk>'] + reserved_tokens
+        # 仅保留词频大于min_freq的token
         uniq_tokens += [token for token, freq in self.token_freqs if freq >= min_freq and token not in uniq_tokens]
         self.idx_to_token, self.token_to_idx = [], dict()
         for token in uniq_tokens:
+            # 将token添加到idx_to_token列表中，根据token的索引可以找到token
             self.idx_to_token.append(token)
+            # 将token添加到token_to_idx字典中，键是token，值是token的索引
             self.token_to_idx[token] = len(self.idx_to_token) - 1
 
     def __len__(self):
@@ -90,3 +101,4 @@ def load_corpus_time_machine(max_tokens=-1):
 
 
 # corpus, vocab = load_corpus_time_machine()
+# a = 1

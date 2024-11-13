@@ -8,6 +8,7 @@ from nlp.RNN.RNNd2l import RNNModelScratch, train_ch8
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 batch_size, num_steps = 32, 35
 train_iter, vocab = load_data_time_machine(batch_size, num_steps)
+a = 1
 
 
 def get_lstm_params(vocab_size, num_hiddens, device):
