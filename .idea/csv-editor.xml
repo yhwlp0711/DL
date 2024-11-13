@@ -94,13 +94,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\climate.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
       </map>
     </option>
   </component>
