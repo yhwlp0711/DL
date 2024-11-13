@@ -14,7 +14,7 @@ class RNNModel(nn.Module):
     def __init__(self, vocab_size, rnn_layer=None):
         super(RNNModel, self).__init__()
         if rnn_layer is None:
-            rnn_layer = nn.RNN(input_size=vocab_size, hidden_size=512)
+            self.rnn = nn.RNN(input_size=vocab_size, hidden_size=512)
         else:
             self.rnn = rnn_layer
         self.vocab_size = vocab_size
@@ -40,8 +40,8 @@ class RNNModel(nn.Module):
             return torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device)
         else:
             return (
-            torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device),
-            torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device))
+                torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device),
+                torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device))
 
 
 def grad_clipping(net, theta):

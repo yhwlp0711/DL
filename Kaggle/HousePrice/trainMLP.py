@@ -27,6 +27,7 @@ label = (label - label_mean) / label_std
 train = all_data.iloc[:n_train]
 test = all_data.iloc[n_train:]
 
+
 # Define model
 class Net(nn.Module):
     def __init__(self):
@@ -49,7 +50,8 @@ class Net(nn.Module):
         x = self.dropout3(x)
         x = self.fc4(x)
         return x
-    
+
+
 # Train model
 if __name__ == '__main__':
     net = Net()

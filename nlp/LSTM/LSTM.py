@@ -52,6 +52,12 @@ def lstm(inputs, state, params):
     (H, C) = state
     outputs = []
     for X in inputs:
+        #  I = σ(W_xi*X_t + W_hi*H_t-1 + b_i)
+        #  F = σ(W_xf*X_t + W_hf*H_t-1 + b_f)
+        #  O = σ(W_xo*X_t + W_ho*H_t-1 + b_o)
+        #  C_tilda = tanh(W_xc*X_t + W_hc*H_t-1 + b_c)
+        #  C = F * C + I * C_tilda
+        #  H = O * C.tanh()
         I = torch.sigmoid(X@W_xi + H@W_hi + b_i)
         F = torch.sigmoid(X@W_xf + H@W_hf + b_f)
         O = torch.sigmoid(X@W_xo + H@W_ho + b_o)
