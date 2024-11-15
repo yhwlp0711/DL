@@ -236,7 +236,7 @@ def test():
     fras = ['va !', 'j\'ai perdu .', 'il est calme .', 'je suis chez moi .']
     for eng, fra in zip(engs, fras):
         translation, attention_weight_seq = predict_seq2seq(net, eng, src_vocab, tgt_vocab, num_steps, device)
-        print(f'{eng} => {translation}, bleu {bleu(translation, fra, k=2):.3f}')
+        print(f'"{eng}" => "{translation}", bleu {bleu(translation, fra, k=2):.3f}')
         print(attention_weight_seq)
 
 
