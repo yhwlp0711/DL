@@ -29,10 +29,12 @@ class RNNModel(nn.Module):
     def forward(self, inputs, state):
         X = F.one_hot(inputs.T.long(), self.vocab_size)
         X = X.to(torch.float32)
-        Y, state = self.rnn(X, state)
+        Y, state = self.rnn(X, state)  # 输出Y的形状是(`时间步数`, `批量大小`, `隐藏单元数`) 隐藏状态的形状是(`层数`, `批量大小`, `隐藏单元数`)
+        # 如果层数为1，则state=Y[-1, :, :]
+        # 即Y是每时刻最后一层的隐藏状态，state是最后时刻每层的隐藏状态
+        # test = Y[-1, :, :]
         # 全连接层首先将`Y`的形状改为(`时间步数`*`批量大小`, `隐藏单元数`)
-        # 它的输出形状是 (`时间步数`*`批量大小`, `词表大小`)
-        output = self.linear(Y.reshape((-1, Y.shape[-1])))
+        output = self.linear(Y.reshape((-1, Y.shape[-1])))  # 它的输出形状是 (`时间步数`*`批量大小`, `词表大小`)
         return output, state
 
     def begin_state(self, device, batch_size=1):

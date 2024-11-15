@@ -78,7 +78,7 @@ def build_array_nmt(lines, vocab, num_steps):
     lines = [vocab[l] for l in lines]
     # 每行添加结束符
     lines = [l + [vocab['<eos>']] for l in lines]
-    # 每行进行截断或填充   array: 二维张量
+    # 每行进行截断或填充   array: 二维张量   num_steps: 每行的长度
     array = torch.tensor([truncate_pad(
         l, num_steps, vocab['<pad>']) for l in lines])
     # valid_len表示每行的有效长度    valid_len: 一维列表
@@ -97,13 +97,14 @@ def load_data_nmt(batch_size, num_steps, num_examples=1000):
     # 获取词汇表
     src_vocab, tgt_vocab = get_vocab_nmt(source, target)
     # 构建数据集
+    # 每句话都需要截断或填充到相同长度
     src_array, src_valid_len = build_array_nmt(source, src_vocab, num_steps)
     tgt_array, tgt_valid_len = build_array_nmt(target, tgt_vocab, num_steps)
     # 转为DataLoader迭代器
     data_arrays = (src_array, src_valid_len, tgt_array, tgt_valid_len)
     data_iter = data.DataLoader(data.TensorDataset(*data_arrays), batch_size, shuffle=True)
     # data_iter = d2l.load_array(data_arrays, batch_size)
-    # 返回迭代器和词汇表
+    # 返回迭代器和词汇表  迭代器每次迭代返回四个张量：源语言句子、源语言句子有效长度、目标语言句子、目标语言句子有效长度
     return data_iter, src_vocab, tgt_vocab
 
 
@@ -117,4 +118,4 @@ def test():
         break
 
 
-test()
+# test()
