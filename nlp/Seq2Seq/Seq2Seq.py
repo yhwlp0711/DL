@@ -8,7 +8,7 @@ from nlp.EncoderDecoder.EncoderDecoder import Encoder, Decoder, EncoderDecoder
 from nlp.VocabandDataset.LoadTranslate import load_data_nmt, truncate_pad
 from nlp.gb import get_device
 
-device = get_device()
+# device = get_device()
 
 
 class Seq2SeqEncoder(Encoder):
@@ -242,4 +242,4 @@ def test():
         print(attention_weight_seq)
 
 
-test()
+# test()

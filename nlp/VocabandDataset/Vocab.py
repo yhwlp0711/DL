@@ -14,7 +14,7 @@ def read_time_machine():
     elif platform.system() == 'Linux':
         path = '/mnt/disk_8Td/zhn/father/NLP/nlp/data/timemachine.txt'
     elif platform.system() == 'Darwin':
-        path = ''
+        path = '/Users/chenmo/code/NLP/nlp/data/timemachine.txt'
     with open(path) as f:
         lines = f.readlines()
     return [re.sub('[^A-Za-z]+', ' ', line).strip().lower() for line in lines]

@@ -19,7 +19,7 @@ def read_data_nmt():
     elif platform.system() == 'Linux':
         path = '/mnt/disk_8Td/zhn/father/NLP/nlp/data/fra-eng/fra.txt'
     elif platform.system() == 'Darwin':
-        path = ''
+        path = '/Users/chenmo/code/NLP/nlp/data/fra-eng/fra.txt'
     with open(path, encoding="utf-8") as f:
         return f.read()
 
