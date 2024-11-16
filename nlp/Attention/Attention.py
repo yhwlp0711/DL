@@ -24,7 +24,8 @@ def MaskedSoftmax(X, valid_lens):
 
 
 class AdditiveAttention(nn.Module):
-    """加性注意力
+    """
+    加性注意力
     a(k, q) = w^T*tanh(W_k*k + W_q*q)
     k: key, q: query
     k(num,key_size)   q(num,query_size)
@@ -79,7 +80,8 @@ class AdditiveAttention(nn.Module):
 
 
 class DotProductAttention(nn.Module):
-    """缩放点积注意力
+    """
+    缩放点积注意力
     a(k, q) = k*q/sqrt(d)
     weights = softmax(a(k, q))
     k: key, q: query
