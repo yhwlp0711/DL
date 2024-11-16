@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 from nlp.RNN.RNN import grad_clipping
-from nlp.Seq2Seq.EncoderDecoder import Encoder, Decoder, EncoderDecoder
+from nlp.EncoderDecoder.EncoderDecoder import Encoder, Decoder, EncoderDecoder
 from nlp.VocabandDataset.LoadTranslate import load_data_nmt, truncate_pad
 from nlp.gb import get_device
 
@@ -15,6 +15,7 @@ class Seq2SeqEncoder(Encoder):
     """用于序列到序列学习的编码器"""""
 
     def __init__(self, vocab_size, embed_size, num_hiddens, num_layers, dropout=0):
+        """encoder中有一个embedding层（vocab_size, embed_size）和一个GRU层"""""
         super(Seq2SeqEncoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size)
         self.rnn = nn.GRU(embed_size, num_hiddens, num_layers, dropout=dropout)
@@ -24,23 +25,24 @@ class Seq2SeqEncoder(Encoder):
         X = self.embedding(X)  # 输出形状是(批量大小, 时间步数, 词嵌入维度)
         X = X.permute(1, 0, 2)  # 输出形状是(时间步数, 批量大小, 词嵌入维度)
         output, state = self.rnn(X)  # output形状是(时间步数, 批量大小, 隐藏单元个数)  state形状是(层数, 批量大小, 隐藏单元个数)
+        #  每时刻最后一层的隐藏状态、最后时刻每层的隐藏状态
         return output, state
 
 
 class Seq2SeqDecoder(Decoder):
     """用于序列到序列学习的解码器"""""
 
-    def __init__(self, vocab_size, embed_size, num_hiddens, num_layers,
-                 dropout=0):
+    def __init__(self, vocab_size, embed_size, num_hiddens, num_layers, dropout=0):
+        """decoder中有一个embedding层（vocab_size, embed_size）、一个GRU层（embed_size + num_hiddens）和一个全连接层（num_hiddens, 
+        vocab_size）"""""
         super(Seq2SeqDecoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size)
-        self.rnn = nn.GRU(embed_size + num_hiddens, num_hiddens, num_layers,
-                          dropout=dropout)
+        self.rnn = nn.GRU(embed_size + num_hiddens, num_hiddens, num_layers, dropout=dropout)
         self.dense = nn.Linear(num_hiddens, vocab_size)
 
     def init_state(self, enc_outputs, *args):
+        """返回编码器的最后时刻每层的隐藏状态 以及最后时刻最后一层的隐藏状态（用于做context）"""""
         # return enc_outputs[1]
-        # 返回编码器的最后时刻每层的隐藏状态 以及 最后时刻最后一层的隐藏状态（用于做context）
         return enc_outputs[1], enc_outputs[1][-1]
 
     def forward(self, X, state):
@@ -50,7 +52,7 @@ class Seq2SeqDecoder(Decoder):
         context = state[-1].repeat(X.shape[0], 1, 1)
         # new
         encode = state[1]
-        # state由tuple变为list
+        # state由(enc_outputs[1], enc_outputs[1][-1])变为enc_outputs[1]
         state = state[0]
         # new end
         X_and_context = torch.cat((X, context), 2)
