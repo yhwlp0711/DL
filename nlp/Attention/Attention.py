@@ -84,7 +84,7 @@ class DotProductAttention(nn.Module):
     weights = softmax(a(k, q))
     k: key, q: query
     k(num,key_size)   q(num,query_size)
-    """
+    """""
     def __init__(self, dropout, **kwargs):
         super(DotProductAttention, self).__init__(**kwargs)
         self.dropout = nn.Dropout(dropout)
