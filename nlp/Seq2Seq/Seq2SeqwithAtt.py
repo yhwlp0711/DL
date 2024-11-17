@@ -81,6 +81,7 @@ class Seq2SeqAttentionDecoder(AttentionDecoder):
 
 def test():
     device = get_device()
+    print(device)
     embed_size, num_hiddens, num_layers, dropout = 32, 32, 2, 0.1
     batch_size, num_steps = 64, 10
     lr, num_epochs = 0.005, 250
@@ -98,5 +99,5 @@ def test():
         print(f'{eng} => {translation}, ', f'bleu {bleu(translation, fra, k=2):.3f}')
 
 
-if __name__ == '__main__':
-    test()
+# if __name__ == '__main__':
+#     test()
