@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from nlp.Seq2Seq.Seq2Seq import SequenceMask
+from nlp.Seq2Seq.Mask import SequenceMask
 
 
 def MaskedSoftmax(X, valid_lens):
@@ -59,13 +59,13 @@ class AdditiveAttention(nn.Module):
         # features(batch_size, num_queries, num_keys, num_hiddens)
         scores = self.w_v(features).squeeze(-1)
         # scores(batch_size, num_queries, num_keys)
-        attention_weights = MaskedSoftmax(scores, valid_lens)
+        self.attention_weights = MaskedSoftmax(scores, valid_lens)
         # torch.bmm对两个三维矩阵进行批量矩阵乘操作
         # attention_weights(batch_size, num_queries, num_keys)
         # values(batch_size, num_keys, value_size)
         # result(batch_size, num_queries, value_size)
         # 即每个query对所有key的value进行加权求和
-        return torch.bmm(attention_weights, values)
+        return torch.bmm(self.attention_weights, values)
 
 
 # queries, keys = torch.normal(0, 1, (2, 1, 20)), torch.ones((2, 10, 2))
@@ -107,8 +107,8 @@ class DotProductAttention(nn.Module):
         #  -> (batch_size, num_queries, num_keys)
         scores = torch.bmm(queries, keys.transpose(1, 2)) / torch.sqrt(torch.tensor(d).float())
         # scores(batch_size, num_queries, num_keys)
-        attention_weights = MaskedSoftmax(scores, valid_lens)
+        self.attention_weights = MaskedSoftmax(scores, valid_lens)
         # attention_weights(batch_size, num_queries, num_keys)
         # values(batch_size, num_keys, value_size)
         # result(batch_size, num_queries, value_size)
-        return torch.bmm(attention_weights, values)
+        return torch.bmm(self.attention_weights, values)

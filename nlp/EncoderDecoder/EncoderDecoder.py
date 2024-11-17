@@ -3,7 +3,7 @@ from torch import nn
 
 class Encoder(nn.Module):
     """编码器接口"""""
-    def __init__(self):
+    def __init__(self, **kwargs):
         super(Encoder, self).__init__()
 
     def forward(self, X, *args):
@@ -13,14 +13,14 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     """解码器接口"""""
-    def __init__(self):
+    def __init__(self, **kwargs):
         super(Decoder, self).__init__()
 
     def init_state(self, enc_outputs, *args):
         # NotImplementedError: Decoder的init_state函数必须被子类实现
         raise NotImplementedError
 
-    def forward(self, X, state):
+    def forward(self, X, state, *args):
         # NotImplementedError: Decoder的forward函数必须被子类实现
         raise NotImplementedError
 
