@@ -32,6 +32,7 @@ class AdditiveAttention(nn.Module):
     W_k(key_size,num_hiddens)   W_q(query_size,num_hiddens)
     w_v(num_hiddens,1)
     """""
+    
     def __init__(self, key_size, query_size, num_hiddens, dropout, **kwargs):
         super(AdditiveAttention, self).__init__(**kwargs)
         self.W_k = nn.Linear(key_size, num_hiddens, bias=False)

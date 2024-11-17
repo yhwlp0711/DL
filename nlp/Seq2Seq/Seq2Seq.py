@@ -6,6 +6,7 @@ from torch import nn
 from nlp.RNN.RNN import grad_clipping
 from nlp.EncoderDecoder.EncoderDecoder import Encoder, Decoder, EncoderDecoder
 from nlp.VocabandDataset.LoadTranslate import load_data_nmt, truncate_pad
+from nlp.Seq2Seq.Mask import MaskedSoftmaxCELoss
 from nlp.gb import get_device
 
 # device = get_device()
@@ -15,7 +16,7 @@ class Seq2SeqEncoder(Encoder):
     """用于序列到序列学习的编码器"""""
 
     def __init__(self, vocab_size, embed_size, num_hiddens, num_layers, dropout=0):
-        """encoder中有一个embedding层（vocab_size, embed_size）和一个GRU层"""""
+        """encoder中有一个embedding层(vocab_size, embed_size)和一个GRU层"""""
         super(Seq2SeqEncoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size)
         self.rnn = nn.GRU(embed_size, num_hiddens, num_layers, dropout=dropout)
@@ -33,15 +34,18 @@ class Seq2SeqDecoder(Decoder):
     """用于序列到序列学习的解码器"""""
 
     def __init__(self, vocab_size, embed_size, num_hiddens, num_layers, dropout=0):
-        """decoder中有一个embedding层（vocab_size, embed_size）、一个GRU层（embed_size + num_hiddens）和一个全连接层（num_hiddens, 
-        vocab_size）"""""
+        """
+        decoder中有一个embedding层(vocab_size, embed_size)、一个GRU层(embed_size + num_hiddens)和一个全连接层(num_hiddens, 
+        vocab_size)
+        """""
+        
         super(Seq2SeqDecoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size)
         self.rnn = nn.GRU(embed_size + num_hiddens, num_hiddens, num_layers, dropout=dropout)
         self.dense = nn.Linear(num_hiddens, vocab_size)
 
     def init_state(self, enc_outputs, *args):
-        """返回编码器的最后时刻每层的隐藏状态 以及最后时刻最后一层的隐藏状态（用于做context）"""""
+        """返回编码器的最后时刻每层的隐藏状态 以及最后时刻最后一层的隐藏状态(用于做context)"""""
         # return enc_outputs[1]
         return enc_outputs[1], enc_outputs[1][-1]
 
@@ -74,42 +78,6 @@ class Seq2SeqDecoder(Decoder):
 # output, state = decoder(X, state)
 # print(output.shape, state.shape)
 
-
-def SequenceMask(X, X_len, value=0):
-    maxlen = X.size(1)  # 是X的第二个维度大小，即时间步数
-    # X_len是一个二维张量，第一维是批量大小，第二维是每个样本的长度
-
-    # torch.arange(maxlen, dtype=torch.float32, device=X.device)`: 创建一个从`0`到`maxlen - 1`的一维张量，
-    # 数据类型为`float32`，并且与`X`在同一个设备上。
-    # `[None,:]`: 将一维张量扩展为二维张量，形状变为`(1, maxlen)` `X_len[:, None]`: 将`X_len` 张量扩展为二维张量，形状变为`(batch_size, 1)`。
-    # ` < `: 比较两个张量，生成一个布尔掩码，形状为`(batch_size, maxlen)`。  广播机制
-    # 掩码中每个位置的值表示该位置是否小于对应的`X_len`值。
-    mask = torch.arange(maxlen, dtype=torch.float32, device=X.device)[None, :] < X_len[:, None]
-    # mask的形状是(批量大小, 时间步数)，其中第i行的前X_len[i]个元素为1，其余为0
-    # `~mask`: 对掩码取反，得到一个新的布尔掩码，表示哪些位置的值需要被替换。
-    X[~mask] = value
-    return X
-
-
-# X = torch.tensor([[1, 2, 3], [4, 5, 6]])
-# print(SequenceMask(X, torch.tensor([1, 2])))
-
-
-class MaskedSoftmaxCELoss(nn.CrossEntropyLoss):
-    """带遮蔽的softmax交叉熵损失函数"""""
-
-    def forward(self, pred, label, valid_len):
-        # `pred`的形状是(批量大小, 最大长度, 词表大小)
-        # `label`的形状是(批量大小, 最大长度)
-        # `valid_len`的形状是(批量大小,)，每个元素是样本的有效长度
-        weights = torch.ones_like(label)  # 先创建一个全1的权重张量
-        weights = SequenceMask(weights, valid_len)  # 然后根据`valid_len`生成掩码
-        self.reduction = 'none'  # 因为下面需要对每个位置的损失加权，所以这里指定损失函数的缩减方式为'none'
-        # 调用PyTorch接口计算交叉熵损失，得到一个三维张量
-        unweighted_loss = super(MaskedSoftmaxCELoss, self).forward(pred.permute(0, 2, 1), label)
-        # 在句子级别上计算损失
-        weighted_loss = (unweighted_loss * weights).mean(dim=1)
-        return weighted_loss
 
 
 # loss = MaskedSoftmaxCELoss()
