@@ -9,6 +9,7 @@ from nlp.VocabandDataset.LoadTranslate import load_data_nmt, truncate_pad
 from nlp.Seq2Seq.Mask import MaskedSoftmaxCELoss
 from nlp.gb import get_device
 
+
 # device = get_device()
 
 
@@ -38,7 +39,7 @@ class Seq2SeqDecoder(Decoder):
         decoder中有一个embedding层(vocab_size, embed_size)、一个GRU层(embed_size + num_hiddens)和一个全连接层(num_hiddens, 
         vocab_size)
         """""
-        
+
         super(Seq2SeqDecoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size)
         self.rnn = nn.GRU(embed_size + num_hiddens, num_hiddens, num_layers, dropout=dropout)
@@ -77,7 +78,6 @@ class Seq2SeqDecoder(Decoder):
 # state = decoder.init_state(encoder(X))
 # output, state = decoder(X, state)
 # print(output.shape, state.shape)
-
 
 
 # loss = MaskedSoftmaxCELoss()
@@ -193,6 +193,7 @@ def bleu(pred_seq, label_seq, k):
 
 
 def test():
+    device = get_device()
     embed_size, num_hiddens, num_layers, dropout = 32, 32, 2, 0.1
     batch_size, num_steps = 64, 10
     lr, num_epochs = 0.005, 300
@@ -208,6 +209,5 @@ def test():
         translation, attention_weight_seq = predict_seq2seq(net, eng, src_vocab, tgt_vocab, num_steps, device)
         print(f'"{eng}" => "{translation}", bleu {bleu(translation, fra, k=2):.3f}')
         print(attention_weight_seq)
-
 
 # test()
