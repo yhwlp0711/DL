@@ -23,11 +23,11 @@ class Seq2SeqEncoder(Encoder):
         self.rnn = nn.GRU(embed_size, num_hiddens, num_layers, dropout=dropout)
 
     def forward(self, X, *args):
-        # X的形状是(批量大小, 时间步数)，转置后再获取词嵌入
+        # X的形状是(批量大小, 时间步数)
         X = self.embedding(X)  # 输出形状是(批量大小, 时间步数, 词嵌入维度)
         X = X.permute(1, 0, 2)  # 输出形状是(时间步数, 批量大小, 词嵌入维度)
         output, state = self.rnn(X)  # output形状是(时间步数, 批量大小, 隐藏单元个数)  state形状是(层数, 批量大小, 隐藏单元个数)
-        #  每时刻最后一层的隐藏状态、最后时刻每层的隐藏状态
+        # 每时刻最后一层的隐藏状态、最后时刻每层的隐藏状态
         return output, state
 
 
@@ -111,13 +111,14 @@ def train_seq2seq(net, data_iter, lr, num_epochs, tgt_vocab, device):
             optimizer.zero_grad()
             X, X_vlen, Y, Y_vlen = [x.to(device) for x in batch]
             # 为了让输出对齐，如果不加bos，则输出会从第二个词开始，并最后多一个词
-            bos = torch.tensor([tgt_vocab['<bos>']] * Y.shape[0], device=device).reshape(-1, 1)
-            dec_input = torch.cat([bos, Y[:, :-1]], 1)  # 教师强制
-            # return 了 output, (state, encode)->state即当前的state， encode即
+            bos = torch.tensor([tgt_vocab['<bos>']] * Y.shape[0], device=device).reshape(-1, 1)  # (Y.shape[0], 1)
+            dec_input = torch.cat([bos, Y[:, :-1]], 1)  # 教师强制  沿着第二个维度拼接起来  与原Y shape一样
+            # return output, (state, encode)
             Y_hat, _ = net(X, dec_input, X_vlen)
             l = loss(Y_hat, Y, Y_vlen)
             l.sum().backward()  # 损失函数的标量进行反向传播
             grad_clipping(net, 1)
+            # 计算有效标记的数量，因为PAD不参与损失计算
             num_tokens = Y_vlen.sum()
             optimizer.step()
             with torch.no_grad():
