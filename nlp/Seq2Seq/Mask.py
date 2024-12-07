@@ -37,8 +37,8 @@ class MaskedSoftmaxCELoss(nn.CrossEntropyLoss):
         weights = torch.ones_like(label)  # 先创建一个全1的权重张量
         weights = SequenceMask(weights, valid_len)  # 然后根据`valid_len`生成掩码
         self.reduction = 'none'  # 因为下面需要对每个位置的损失加权，所以这里指定损失函数的缩减方式为'none'
-        # 调用PyTorch接口计算交叉熵损失，得到一个三维张量
+        # 调用PyTorch接口计算交叉熵损失，得到(batch_size, max_len)
         unweighted_loss = super(MaskedSoftmaxCELoss, self).forward(pred.permute(0, 2, 1), label)
-        # 在句子级别上计算损失
+        # 在句子级别上计算损失  mean之前是每个词的损失  得到(batch_size,)
         weighted_loss = (unweighted_loss * weights).mean(dim=1)
         return weighted_loss
