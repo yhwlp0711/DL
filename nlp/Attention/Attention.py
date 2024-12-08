@@ -28,7 +28,7 @@ class AdditiveAttention(nn.Module):
     加性注意力
     a(k, q) = w^T*tanh(W_k*k + W_q*q)
     k: key, q: query
-    k(num,key_size)   q(num,query_size)
+    k(num_keys,key_size)   q(num_queries,query_size)
     W_k(key_size,num_hiddens)   W_q(query_size,num_hiddens)
     w_v(num_hiddens,1)
     """""
@@ -48,7 +48,6 @@ class AdditiveAttention(nn.Module):
         valid_lens(batch_size, num_queries)->reshape(-1)->(batch_size*num_queries,)
         valid_lens(batch_size,)->repeat(queries.shape[1])->(batch_size*num_queries,)
         """""
-        
         # 每条query和key映射到num_hiddens维
         queries, keys = self.W_q(queries), self.W_k(keys)
         # queries(batch_size, num_queries, num_hiddens)
@@ -68,16 +67,16 @@ class AdditiveAttention(nn.Module):
         return torch.bmm(self.attention_weights, values)
 
 
-# queries, keys = torch.normal(0, 1, (2, 1, 20)), torch.ones((2, 10, 2))
-# # queries(batch_size=2, num_queries=1, query_size=20)
-# # keys(batch_size=2, num_keys=10, key_size=2)
-# # values的小批量，两个值矩阵是相同的
-# values = torch.arange(40, dtype=torch.float32).reshape(1, 10, 4).repeat(2, 1, 1)
-# valid_lens = torch.tensor([2, 6])
+queries, keys = torch.normal(0, 1, (2, 1, 20)), torch.ones((2, 10, 2))
+# queries(batch_size=2, num_queries=1, query_size=20)
+# keys(batch_size=2, num_keys=10, key_size=2)
+# values的小批量，两个值矩阵是相同的
+values = torch.arange(40, dtype=torch.float32).reshape(1, 10, 4).repeat(2, 1, 1)
+valid_lens = torch.tensor([2, 6])
 
-# attention = AdditiveAttention(key_size=2, query_size=20, num_hiddens=8,dropout=0.1)
-# attention.eval()
-# print(attention(queries, keys, values, valid_lens))
+attention = AdditiveAttention(key_size=2, query_size=20, num_hiddens=8,dropout=0.1)
+attention.eval()
+print(attention(queries, keys, values, valid_lens))
 
 
 class DotProductAttention(nn.Module):

@@ -3,7 +3,7 @@ from torch import nn
 
 
 def SequenceMask(X, X_len, value=0):
-    """X_len表示每行的有效长度，根据X_len处理X的每行，有效长度外设为0"""""
+    """X_len表示每行的有效长度 根据X_len处理X的每行 有效长度外设为value"""""
     maxlen = X.size(1)  # 是X的第二个维度大小，即时间步数
     # X_len是一个二维张量，第一维是批量大小，第二维是每个样本的长度
 

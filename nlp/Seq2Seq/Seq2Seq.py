@@ -60,7 +60,7 @@ class Seq2SeqDecoder(Decoder):
         X = self.embedding(X).permute(1, 0, 2)
         # 广播最后时刻最后一层的隐藏状态，使其具有与X相同的num_steps 其实就是把state[-1]复制num_steps次
         context = state[-1].repeat(X.shape[0], 1, 1)
-        # encode为最后时刻最后一层的隐藏状态
+        # encode为最后时刻最后一层的隐藏状态，用于做context
         encode = state[1]
         # state由(enc_outputs[1], enc_outputs[1][-1])变为enc_outputs[1]
         # state: (num_layers, batch_size, num_hiddens)
@@ -226,4 +226,4 @@ def test():
         print(f'"{eng}" => "{translation}", bleu {bleu(translation, fra, k=2):.3f}')
         print(attention_weight_seq)
 
-test()
+# test()

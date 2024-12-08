@@ -57,11 +57,22 @@ class Seq2SeqAttentionDecoder(AttentionDecoder):
             # 所以使用hidden_state[-1]，即上一个时间步的输出的最后一层，unsqueeze(增加query的数量 维度)后作为query
             query = torch.unsqueeze(hidden_state[-1], dim=1)
             # query: (batch_size, 1, num_hiddens)
+            # hidden_state[-1]作为query，编码器每时刻最后一层的输出作为key和value
+            # 计算query与key的attention(batch_size,num_query,num_key)
+            # 对value(batch_size,num_key,value_size=num_hiddens)
+            # 的dim=1加权求和得到context(batch_size,1,num_hiddens)
+            # 原Seq2Seq中的context是编码器每时刻最后一层的输出(num_steps,batch_size,num_hiddens)
             context = self.attention(query, enc_outputs, enc_outputs, enc_valid_lens)
+            # x是X的每个时间步的词，所以x的num_steps是1
             x = torch.cat((context, torch.unsqueeze(x, dim=1)), dim=-1)
+            # x: (batch_size, num_steps=1, embed_size + num_hiddens)
+            # -> (num_steps=1, batch_size, embed_size + num_hiddens)
             out, hidden_state = self.rnn(x.permute(1, 0, 2), hidden_state)
+            # out: (num_steps=1, batch_size, num_hiddens)
+            # hidden_state: (num_layers, batch_size, num_hiddens)
             outputs.append(out)
             self._attention_weights.append(self.attention.attention_weights)
+        # 遍历完所有时间步后，outputs的形状是(num_steps, batch_size, num_hiddens)
         outputs = self.dense(torch.cat(outputs, dim=0))
         # outputs: (num_steps, batch_size, vocab_size)
         return outputs.permute(1, 0, 2), [enc_outputs, hidden_state, enc_valid_lens]
@@ -84,7 +95,7 @@ def test():
     print(device)
     embed_size, num_hiddens, num_layers, dropout = 32, 32, 2, 0.1
     batch_size, num_steps = 64, 10
-    lr, num_epochs = 0.005, 250
+    lr, num_epochs = 0.005, 1
 
     train_iter, src_vocab, tgt_vocab = load_data_nmt(batch_size, num_steps)
     encoder = Seq2SeqEncoder(len(src_vocab), embed_size, num_hiddens, num_layers, dropout)
@@ -99,5 +110,5 @@ def test():
         print(f'{eng} => {translation}, ', f'bleu {bleu(translation, fra, k=2):.3f}')
 
 
-# if __name__ == '__main__':
-#     test()
+if __name__ == '__main__':
+    test()
