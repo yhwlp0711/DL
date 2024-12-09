@@ -164,6 +164,7 @@ class TransformerDecoder(nn.Module):
         self.pos_encoding = PositionalEncoding(num_hiddens, dropout)
         self.attention_weights = [None] * num_layers
         self.blks = nn.Sequential()
+        self.dense = nn.Linear(num_hiddens, vocab_size)
         for i in range(num_layers):
             self.blks.add_module("block" + str(i),
                                  DecoderBlock(key_size, query_size, value_size, num_hiddens, norm_shape, ffn_num_input,
@@ -177,7 +178,8 @@ class TransformerDecoder(nn.Module):
         for i, blk in enumerate(self.blks):
             X, state = blk(X, state)
             self.attention_weights[i] = blk.attention1.attention.attention_weights
-        return X, state
+
+        return self.dense(X), state
 
     @property
     def attention_weights_list(self):

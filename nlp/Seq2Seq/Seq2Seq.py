@@ -128,7 +128,6 @@ def train_seq2seq(net, data_iter, lr, num_epochs, tgt_vocab, device):
             Y_hat, _ = net(X, dec_input, X_vlen)
             l = loss(Y_hat, Y, Y_vlen)
             l.sum().backward()  # 损失函数的标量进行反向传播
-            print(epoch)
             grad_clipping(net, 1)
             # 计算有效标记的数量，因为PAD不参与损失计算
             num_tokens = Y_vlen.sum()
