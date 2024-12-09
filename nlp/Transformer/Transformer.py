@@ -1,5 +1,5 @@
 import math
-import pandas as pd
+
 import torch
 from torch import nn
 
@@ -10,6 +10,9 @@ from nlp.Transformer.Positional import PositionalEncoding
 from nlp.VocabandDataset.LoadTranslate import load_data_nmt
 from nlp.gb import get_device
 
+
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 # ln = nn.LayerNorm(2)
 # bn = nn.BatchNorm1d(2)

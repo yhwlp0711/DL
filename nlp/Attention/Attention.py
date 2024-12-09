@@ -67,16 +67,16 @@ class AdditiveAttention(nn.Module):
         return torch.bmm(self.attention_weights, values)
 
 
-queries, keys = torch.normal(0, 1, (2, 1, 20)), torch.ones((2, 10, 2))
-# queries(batch_size=2, num_queries=1, query_size=20)
-# keys(batch_size=2, num_keys=10, key_size=2)
-# values的小批量，两个值矩阵是相同的
-values = torch.arange(40, dtype=torch.float32).reshape(1, 10, 4).repeat(2, 1, 1)
-valid_lens = torch.tensor([2, 6])
-
-attention = AdditiveAttention(key_size=2, query_size=20, num_hiddens=8,dropout=0.1)
-attention.eval()
-print(attention(queries, keys, values, valid_lens))
+# queries, keys = torch.normal(0, 1, (2, 1, 20)), torch.ones((2, 10, 2))
+# # queries(batch_size=2, num_queries=1, query_size=20)
+# # keys(batch_size=2, num_keys=10, key_size=2)
+# # values的小批量，两个值矩阵是相同的
+# values = torch.arange(40, dtype=torch.float32).reshape(1, 10, 4).repeat(2, 1, 1)
+# valid_lens = torch.tensor([2, 6])
+#
+# attention = AdditiveAttention(key_size=2, query_size=20, num_hiddens=8,dropout=0.1)
+# attention.eval()
+# print(attention(queries, keys, values, valid_lens))
 
 
 class DotProductAttention(nn.Module):

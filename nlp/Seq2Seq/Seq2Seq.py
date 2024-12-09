@@ -128,10 +128,12 @@ def train_seq2seq(net, data_iter, lr, num_epochs, tgt_vocab, device):
             Y_hat, _ = net(X, dec_input, X_vlen)
             l = loss(Y_hat, Y, Y_vlen)
             l.sum().backward()  # 损失函数的标量进行反向传播
+            print(epoch)
             grad_clipping(net, 1)
             # 计算有效标记的数量，因为PAD不参与损失计算
             num_tokens = Y_vlen.sum()
             optimizer.step()
+            # optimizer.zero_grad()
             with torch.no_grad():
                 metric[0] += l.sum()
                 metric[1] += num_tokens
@@ -210,7 +212,7 @@ def test():
     device = get_device()
     embed_size, num_hiddens, num_layers, dropout = 32, 32, 2, 0.1
     batch_size, num_steps = 64, 10
-    lr, num_epochs = 0.005, 1
+    lr, num_epochs = 0.005, 100
     # train_iter返回四个张量：源语言句子的索引、源语言句子有效长度、目标语言句子的索引、目标语言句子有效长度
     train_iter, src_vocab, tgt_vocab = load_data_nmt(batch_size, num_steps)
     encoder = Seq2SeqEncoder(len(src_vocab), embed_size, num_hiddens, num_layers, dropout)
@@ -225,5 +227,6 @@ def test():
         translation, attention_weight_seq = predict_seq2seq(net, eng, src_vocab, tgt_vocab, num_steps, device)
         print(f'"{eng}" => "{translation}", bleu {bleu(translation, fra, k=2):.3f}')
         print(attention_weight_seq)
+
 
 # test()
