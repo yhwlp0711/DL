@@ -94,7 +94,7 @@ class DotProductAttention(nn.Module):
     def forward(self, queries, keys, values, valid_lens=None):
         """
         queries(batch_size, num_queries, query_size=d)
-        keys(batch_size, num_keys, key_size=d)
+        keys(batch_size, num_keys, key_size)
         values(batch_size, num_keys, value_size)
         valid_lens(batch_size, num_queries)->reshape(-1)->(batch_size*num_queries,)
         valid_lens(batch_size,)->repeat(queries.shape[1])->(batch_size*num_queries,)

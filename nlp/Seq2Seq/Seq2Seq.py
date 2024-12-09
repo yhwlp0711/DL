@@ -170,7 +170,7 @@ def predict_seq2seq(net, src_sentence, src_vocab, tgt_vocab, num_steps,
         # 其中state[0]更新，state[1]不变
         Y, dec_state = net.decoder(dec_X, dec_state)
         # 我们使用具有预测最高可能性的词元，作为解码器在下一时间步的输入
-        dec_X = Y.argmax(dim=2) # Y:(1, 1, vocab_size) -> dec_X:(1, 1)
+        dec_X = Y.argmax(dim=2)  # Y:(1, 1, vocab_size) -> dec_X:(1, 1)
         pred = dec_X.squeeze(dim=0).type(torch.int32).item()
         # 保存注意力权重（稍后讨论）
         if save_attention_weights:
