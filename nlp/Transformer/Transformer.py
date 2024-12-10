@@ -210,4 +210,4 @@ def test():
         print(f'{eng} => {translation}, bleu {bleu(translation, fra, k=2):.3f}')
 
 
-test()
+# test()
