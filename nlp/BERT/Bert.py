@@ -9,8 +9,8 @@ def get_tokens_and_segments(tokens_a, tokens_b=None):
     :param tokens_a: list of tokens
     :param tokens_b: list of tokens
     :return:
-     tokens: [[cls],tokens_a,[sep],tokens_b,[sep]]
-     segments: [0,0,0,1,1]
+    tokens: [[cls],tokens_a,[sep],tokens_b,[sep]]
+    segments: [0,0,0,1,1]
     """""
     tokens = ['[CLS]'] + tokens_a + ['[SEP]']
     segments = [0] * len(tokens)
