@@ -12,10 +12,10 @@ def get_tokens_and_segments(tokens_a, tokens_b=None):
      tokens: [[cls],tokens_a,[sep],tokens_b,[sep]]
      segments: [0,0,0,1,1]
     """""
-    tokens = ['[CLS]'] + tokens_a + ['[SEP]']
+    tokens = ['[cls]'] + tokens_a + ['[sep]']
     segments = [0] * len(tokens)
     if tokens_b:
-        tokens += tokens_b + ['[SEP]']
+        tokens += tokens_b + ['[sep]']
         segments += [1] * (len(tokens_b) + 1)
     return tokens, segments
 
@@ -62,7 +62,7 @@ class MaskLM(nn.Module):
 
     def forward(self, X, pred_positions):
         """
-        X为encoder的输出(batch_size, seq_len, num_hiddens)在pred_positions位置上进行mask
+        X为encoder的输出(batch_size, seq_len, num_hiddens)在pred_positions位置上进行了mask
         :param X: (batch_size, seq_len, num_hiddens)
         :param pred_positions: (batch_size, num_pred_positions)  每个批次的预测位置
         返回每个预测位置的softmax输出
@@ -73,7 +73,7 @@ class MaskLM(nn.Module):
         batch_size = X.shape[0]
         batch_idx = torch.arange(0, batch_size)
         batch_idx = torch.repeat_interleave(batch_idx, num_pred_positions)
-        masked_X = X[batch_idx, pred_positions]
+        masked_X = X[batch_idx, pred_positions]  # 取出mask位置的计算结果
         masked_X = masked_X.reshape((batch_size, num_pred_positions, -1))
         mlm_Y_hat = self.mlp(masked_X)
         return mlm_Y_hat
@@ -88,7 +88,7 @@ class NextSentencePred(nn.Module):
         """
         X为encoder输出的每个句子的第一个token([cls])的隐藏状态
         :param X: (batch_size, num_hiddens)
-        :return nsp_Y_hat: (batch_size, 2)
+        :return: nsp_Y_hat: (batch_size, 2)
         """""
         return self.output(X)
 
@@ -127,7 +127,7 @@ class BertModel(nn.Module):
         super(BertModel, self).__init__()
         self.encoder = BertEncoder(vocab_size, num_hiddens, norm_shape, ffn_num_input, ffn_num_hiddens, num_heads,
                                    num_layers, dropout, max_len, key_size, query_size, value_size)
-        self.hidden = nn.Sequential(nn.Linear(num_hiddens, num_hiddens), nn.Tanh())
+        self.hidden = nn.Sequential(nn.Linear(hid_in_features, num_hiddens), nn.Tanh())
         self.mlm = MaskLM(vocab_size, mlm_in_features)
         self.nsp = NextSentencePred(nsp_in_features)
 
@@ -137,9 +137,9 @@ class BertModel(nn.Module):
         :param segments: (batch_size, seq_len)
         :param valid_lens: (batch_size,)
         :param pred_positions: (batch_size, num_pred_positions)
-        :return encoded_X: (batch_size, seq_len, num_hiddens)  # encoder的输出
-        :return mlm_Y_hat: (batch_size, num_pred_positions, vocab_size)  # 每个序列的预测位置的softmax输出
-        :return nsp_Y_hat: (batch_size, 2)  # 每个序列中的两个句子是否连续的softmax输出
+        :return: encoded_X: (batch_size, seq_len, num_hiddens)  # encoder的输出
+         mlm_Y_hat: (batch_size, num_pred_positions, vocab_size)  # 每个序列的预测位置的softmax输出
+         nsp_Y_hat: (batch_size, 2)  # 每个序列中的两个句子是否连续的softmax输出
         """""
         encoded_X = self.encoder(tokens, segments, valid_lens)
         if pred_positions is not None:
@@ -153,13 +153,13 @@ class BertModel(nn.Module):
         return encoded_X, mlm_Y_hat, nsp_Y_hat
 
 
-vocab_size, num_hiddens, ffn_num_hiddens, num_heads = 10000, 768, 1024, 4
-norm_shape, ffn_num_input, num_layers, dropout = [768], 768, 2, 0.2
-Bert = BertModel(vocab_size, num_hiddens, norm_shape, ffn_num_input, ffn_num_hiddens, num_heads, num_layers, dropout)
-tokens = torch.randint(0, vocab_size, (2, 8))  # batch_size=2, seq_len=8  其中包含的整数值在 [0, vocab_size) 范围内
-segments = torch.tensor([[0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1]])  # batch_size=2, seq_len=8
-mlm_positions = torch.tensor([[1, 5, 2], [6, 1, 5]])  # batch_size=2, num_pred_positions=3
-res = Bert(tokens, segments, pred_positions=mlm_positions)
-for i in res:
-    if i is not None:
-        print(i.shape)
+# vocab_size, num_hiddens, ffn_num_hiddens, num_heads = 10000, 768, 1024, 4
+# norm_shape, ffn_num_input, num_layers, dropout = [768], 768, 2, 0.2
+# Bert = BertModel(vocab_size, num_hiddens, norm_shape, ffn_num_input, ffn_num_hiddens, num_heads, num_layers, dropout)
+# tokens = torch.randint(0, vocab_size, (2, 8))  # batch_size=2, seq_len=8  其中包含的整数值在 [0, vocab_size) 范围内
+# segments = torch.tensor([[0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1]])  # batch_size=2, seq_len=8
+# mlm_positions = torch.tensor([[1, 5, 2], [6, 1, 5]])  # batch_size=2, num_pred_positions=3
+# res = Bert(tokens, segments, pred_positions=mlm_positions)
+# for i in res:
+#     if i is not None:
+#         print(i.shape)

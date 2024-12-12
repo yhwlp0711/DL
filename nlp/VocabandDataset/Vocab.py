@@ -27,6 +27,9 @@ def read_time_machine():
 
 
 def tokenize(lines, token='word'):
+    """
+    将文本行拆分为单词或字符标记
+    """""
     if token == 'word':
         return [line.split() for line in lines]
     elif token == 'char':

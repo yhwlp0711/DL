@@ -143,6 +143,7 @@ class DecoderBlock(nn.Module):
         state[2][self.i] = key_values
         if self.training:
             batch_size, num_steps, _ = X.shape
+            # shape: (batch_size, num_steps)  mask掉未来信息
             dec_valid_lens = torch.arange(1, num_steps + 1, device=X.device).repeat(batch_size, 1)
         else:
             dec_valid_lens = None
@@ -210,4 +211,4 @@ def test():
         print(f'{eng} => {translation}, bleu {bleu(translation, fra, k=2):.3f}')
 
 
-# test()
+test()
