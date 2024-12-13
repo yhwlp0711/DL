@@ -2,3 +2,5 @@
 .idea
 .vscode
 .venv
+nlp/BERT/data
+nlp/BERT/models
