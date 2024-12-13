@@ -4,7 +4,7 @@ from torch import nn
 from nlp.gb import get_device
 from nlp.BERT.Bert import BertModel, get_tokens_and_segments
 
-from nlp.BERT.DataLoad import load_data_wiki
+from nlp.BERT.WikiDataLoad import load_data_wiki
 
 batch_size, max_len = 512, 64
 train_iter, vocab = load_data_wiki(batch_size, max_len)

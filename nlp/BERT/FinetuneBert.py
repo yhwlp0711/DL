@@ -129,14 +129,14 @@ def train_ch13(net, train_iter, test_iter, loss, trainer, num_epochs, devices):
     #                         legend=['train loss', 'train acc', 'test acc'])
     net = nn.DataParallel(net, device_ids=devices).to(devices[0])
     for epoch in range(num_epochs):
-        # print('epoch:', epoch)
+        print('epoch:', epoch)
         # Sum of training loss, sum of training accuracy, no. of examples,
         # no. of predictions
         # metric = d2l.Accumulator(4)
         metric = [0.0, 0.0, 0, 0]
         for i, (features, labels) in enumerate(train_iter):
             # timer.start()
-            print('i:', i)
+            # print('i:', i)
             l, acc = train_batch_ch13(net, features, labels, loss, trainer, devices)
             # metric.add(l, acc, labels.shape[0], labels.numel())
             metric[0] += l
