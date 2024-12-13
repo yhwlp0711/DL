@@ -72,9 +72,9 @@ def train_bert(train_iter, net, loss, vocab_size, device, num_steps):
 def get_bert_encoding(net, tokens_a, tokens_b=None):
     net.eval()
     tokens, segments = get_tokens_and_segments(tokens_a, tokens_b)
-    token_ids = torch.tensor(vocab[tokens], device).unsqueeze(0)
-    segments = torch.tensor(segments, device).unsqueeze(0)
-    valid_len = torch.tensor(len(tokens), device).unsqueeze(0)
+    token_ids = torch.tensor(vocab[tokens], device=device).unsqueeze(0)
+    segments = torch.tensor(segments, device=device).unsqueeze(0)
+    valid_len = torch.tensor(len(tokens), device=device).unsqueeze(0)
     encoded_X, _, _ = net(token_ids, segments, valid_len)
     return encoded_X
 
