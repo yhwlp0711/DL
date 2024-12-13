@@ -53,8 +53,7 @@ class SNLIBERTDataset(torch.utils.data.Dataset):
     def _preprocess(self, all_premise_hypothesis_tokens):
         pool = multiprocessing.Pool(4)  # 使用4个进程
         out = pool.map(self._mp_worker, all_premise_hypothesis_tokens)
-        all_token_ids = [
-            token_ids for token_ids, segments, valid_len in out]
+        all_token_ids = [token_ids for token_ids, segments, valid_len in out]
         all_segments = [segments for token_ids, segments, valid_len in out]
         valid_lens = [valid_len for token_ids, segments, valid_len in out]
         return (torch.tensor(all_token_ids, dtype=torch.long),
@@ -169,7 +168,7 @@ if __name__ == '__main__':
     train_iter = torch.utils.data.DataLoader(train_set, batch_size, shuffle=True, num_workers=num_workers)
     test_iter = torch.utils.data.DataLoader(test_set, batch_size, num_workers=num_workers)
     net = BERTClassifier(bert)
-    lr, num_epochs = 1e-4, 5
+    lr, num_epochs = 1e-4, 10
     trainer = torch.optim.Adam(net.parameters(), lr=lr)
     loss = nn.CrossEntropyLoss(reduction='none')
     train_ch13(net, train_iter, test_iter, loss, trainer, num_epochs, devices=[device])
