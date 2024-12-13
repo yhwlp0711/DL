@@ -110,5 +110,5 @@ def test():
         print(f'{eng} => {translation}, ', f'bleu {bleu(translation, fra, k=2):.3f}')
 
 
-if __name__ == '__main__':
-    test()
+# if __name__ == '__main__':
+#     test()

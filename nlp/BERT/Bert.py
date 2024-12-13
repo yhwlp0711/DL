@@ -29,14 +29,14 @@ class BertEncoder(nn.Module):
         self.blks = nn.Sequential()
         for i in range(num_layers):
             self.blks.add_module(f"{i}", EncoderBlock(key_size, query_size, value_size, num_hiddens, norm_shape,
-                                                      ffn_num_input, ffn_num_hiddens, num_heads, dropout, i))
+                                                      ffn_num_input, ffn_num_hiddens, num_heads, dropout, use_bias=True))
 
         # 创建一个形状为(1, max_len, num_hiddens)的张量，其值是从标准正态分布中随机生成的
         # 1：批量大小维度，设置为1，因为位置嵌入对批量中的所有输入都是相同的
         # max_len：模型可以处理的最大序列长度
         # num_hiddens：隐藏层的大小，与嵌入大小相同
         # 对于[0,i,:]，得到第i个位置的嵌入向量
-        self.position_embedding = nn.Parameter(torch.randn(1, max_len, num_hiddens))
+        self.pos_embedding = nn.Parameter(torch.randn(1, max_len, num_hiddens))
 
     def forward(self, tokens, segments, valid_lens=None):
         """
@@ -48,7 +48,7 @@ class BertEncoder(nn.Module):
         # X (batch_size, seq_len, num_hiddens)
         X = self.token_embedding(tokens) + self.segment_embedding(segments)
         # 取出前seq_len个位置的嵌入向量
-        X = X + self.position_embedding.data[:, :X.shape[1], :]
+        X = X + self.pos_embedding.data[:, :X.shape[1], :]
         for blk in self.blks:
             X = blk(X, valid_lens)
         return X
@@ -128,7 +128,7 @@ class BertModel(nn.Module):
         self.encoder = BertEncoder(vocab_size, num_hiddens, norm_shape, ffn_num_input, ffn_num_hiddens, num_heads,
                                    num_layers, dropout, max_len, key_size, query_size, value_size)
         self.hidden = nn.Sequential(nn.Linear(hid_in_features, num_hiddens), nn.Tanh())
-        self.mlm = MaskLM(vocab_size, mlm_in_features)
+        self.mlm = MaskLM(vocab_size, num_hiddens, mlm_in_features)
         self.nsp = NextSentencePred(nsp_in_features)
 
     def forward(self, tokens, segments, valid_lens=None, pred_positions=None):

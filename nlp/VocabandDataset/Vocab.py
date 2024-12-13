@@ -55,7 +55,9 @@ def count_corpus(tokens):
 
 
 class Vocab:
-    def __init__(self, tokens, min_freq=0, reserved_tokens=None):
+    def __init__(self, tokens=None, min_freq=0, reserved_tokens=None):
+        if tokens is None:
+            tokens = []
         if reserved_tokens is None:
             reserved_tokens = []
         # 统计词频

@@ -135,11 +135,10 @@ def predict_ch3(net, test_iter, n=6):
     d2l.show_images(X[0:n].reshape((n, 28, 28)), 1, n, titles=titles[0:n])
     d2l.plt.show()
 
-
-lr = 0.1
-num_epochs = 3
-
-if __name__ == '__main__':
-    train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, updater)
-    # d2l.plt.show()
-    predict_ch3(net, test_iter)
+# lr = 0.1
+# num_epochs = 3
+#
+# if __name__ == '__main__':
+#     train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, updater)
+#     # d2l.plt.show()
+#     predict_ch3(net, test_iter)

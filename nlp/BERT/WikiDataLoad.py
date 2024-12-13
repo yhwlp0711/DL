@@ -229,7 +229,7 @@ def load_data_wiki(batch_size, max_len):
     """加载WikiText-2数据集"""
     # num_workers = d2l.get_dataloader_workers()
     # data_dir = d2l.download_extract('wikitext-2', 'wikitext-2')
-    data_dir = './wikitext-2/'
+    data_dir = './data/wikitext-2/'
     paragraphs = _read_wiki(data_dir)
     train_set = _WikiTextDataset(paragraphs, max_len)
     train_iter = torch.utils.data.DataLoader(train_set, batch_size,
@@ -246,3 +246,5 @@ def load_data_wiki(batch_size, max_len):
 #           pred_positions_X.shape, mlm_weights_X.shape, mlm_Y.shape,
 #           nsp_y.shape)
 #     break
+
+
