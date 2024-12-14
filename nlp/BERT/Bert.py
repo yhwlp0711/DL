@@ -62,7 +62,7 @@ class MaskLM(nn.Module):
 
     def forward(self, X, pred_positions):
         """
-        X为encoder的输出(batch_size, seq_len, num_hiddens)在pred_positions位置上进行了mask
+        X为encoder的输出(batch_size, seq_len, num_hiddens)在pred_positions位置上进行mask之后的序列
         :param X: (batch_size, seq_len, num_hiddens)
         :param pred_positions: (batch_size, num_pred_positions)  每个批次的预测位置
         返回每个预测位置的softmax输出
