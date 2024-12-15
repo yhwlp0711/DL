@@ -11,7 +11,9 @@
 ## 2.RoPE
 
 传统的在Embedding上加入位置编码，而RoPE在Q、K矩阵上加入位置编码。
+
 ### 2.1假设词嵌入为二维  
+
 对于 token $x_m$，$x_n$，有：  
 $$x_m'=W_qx_me^{im\theta}=q_me^{im\theta}$$
 $$x_n'=W_kx_ne^{in\theta}=k_ne^{in\theta}$$
@@ -40,17 +42,26 @@ $$g(x_m'^T,x_n',m-n)=Re[(W_qx_m)^T(W_kx_n)^*e^{i(m-n)\theta}]$$
 $R(m)R(n)^T$即为先旋转 m 角度，再旋转 -n 角度，等价于旋转 m-n 角度。
 
 ### 2.2推广到多维
+
 两两一组，如图所示：
 ![img](./src/RoPE.png)
 其中 $\theta_i=1/10000^{2i/d}$。
 
+## 3.SwiGLU(Switched Gated Linear Unit)
 
-## 3.SwiGLU
+|激活函数|公式|特点|
+|:-:|:-:|:-:|
+|GLU|$GLU(x)=(xW_1+b_1)\times \sigma (xW_2+b_2)$|使用Sigmoid，计算复杂的较高|
+|GELU|$GELU(x)=x\times \Phi(x)$|平滑激活，但无门控机制|
+|SwiGLU|$SwiGLU(x)=Swish_\beta (xW_1+b_1) \times (xW_2+b_2)$|引入 Swish 和门控机制，性能优异，计算效率较高|
+
+其中$\Phi (x)$为伯努利分布，$Swish_\beta(x)=x \times \sigma (\beta x)$，$\beta$ 为可学习参数，GLU与SwiGLU中都是矩阵逐元素相乘。
 
 ## 4.MOE(Mixture of Experts)
+
 核心思想是稀疏激活（Sparse Activation），即并不是每次都激活所有专家，而是根据输入动态选择部分专家来参与计算。  
 每个“专家”其实是一个较小的子模型（例如一个小型的神经网络），这些专家能够针对不同的数据分布或者任务表现出更好的性能。
+
 ## 5.Dense Transformer
+
 即标准Transformer，每个位置都会和所有其他位置进行交互，这种全连接的方式会导致计算复杂度随序列长度的平方增长。
-
-
